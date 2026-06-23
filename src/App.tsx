@@ -614,21 +614,70 @@ const GenericExample = () => {
 
 
 // type DeclarationFormData = Omit<Declaration, "id" | "submited">
-// type DeclarationUpdate = { id: string } & Partial<Omit<Declaration, "id">>
+type DeclarationUpdate = { id: string } & Partial<Omit<Declaration, "id">>
 // type ClientSummary = Pick<FullClient, "id" | "name">
 // type ClientFormData = Partial<Omit<FullClient, "id">>
 // type DeclarationFormErrors = Partial<Record<keyof Declaration, string>>
 // type ClientIndex = Record<string, ClientSummary[]>
 
-// const DeclarationUpdateForm = (declaration: Declaration) => {
-//   return(
-//     <div>
-//       <form typeof="DeclarationUpdate">
-        
-//       </form>
-//     </div>
-//   )
-// }
+
+
+const DeclarationUpdateForm = ({ declaration }: { declaration: Declaration }) => {
+  const [form, setForm] = useState<DeclarationUpdate>({
+    id: declaration.id,
+    clientName: declaration.clientName,
+    deadline: declaration.deadline
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value, id: declaration.id }))
+  }
+
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    console.log("Updated:", { ...declaration, ...form })
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        name="clientName"
+        value={form.clientName ?? ""}
+        onChange={handleChange}
+      />
+      <input
+        name="deadline"
+        value={form.deadline ?? ""}
+        onChange={handleChange}
+      />
+      <button type="submit">Update</button>
+    </form>
+  )
+}
+
+const DeclarationUpdateComponet = () => {
+  const [selDec, setSelDec] = useState<Declaration | null>()
+  const decs = mockDeclarations
+  
+  
+  return (
+    <div>
+      <button onClick={() => setSelDec(null)}>Clear</button>
+      <ul>
+        {decs.map((d) => 
+          <li key={d.id} onClick={() => setSelDec(d)}>
+            {d.clientName} {d.deadline} {d.type} {d.submitted ? "Submited" : "Unsubmited"} 
+          </li>
+        )}
+      </ul>
+
+      <div>
+        {selDec && <DeclarationUpdateForm declaration={selDec}/>}
+      </div>
+    </div>
+  )
+}
 
 // --- App ---
 
@@ -685,6 +734,7 @@ const App = () => {
       <GenericExample/>
       
       <h2>Lesson 15 — Utility</h2>
+      <DeclarationUpdateComponet/>
     </div>
   )
 }
