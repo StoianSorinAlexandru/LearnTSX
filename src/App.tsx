@@ -593,6 +593,43 @@ const GenericExample = () => {
   )
 } 
 
+// --- Lesson 15: Utility Types ---
+
+// type FullClient = {
+//   id: string
+//   name: string
+//   cui: string
+//   email: string
+//   isActive: boolean
+// }
+
+
+// type Declaration = {
+//   id: string
+//   clientName: string
+//   type: "D300" | "D390" | "SAF-T"
+//   deadline: string
+//   submitted: boolean
+// }
+
+
+// type DeclarationFormData = Omit<Declaration, "id" | "submited">
+// type DeclarationUpdate = { id: string } & Partial<Omit<Declaration, "id">>
+// type ClientSummary = Pick<FullClient, "id" | "name">
+// type ClientFormData = Partial<Omit<FullClient, "id">>
+// type DeclarationFormErrors = Partial<Record<keyof Declaration, string>>
+// type ClientIndex = Record<string, ClientSummary[]>
+
+// const DeclarationUpdateForm = (declaration: Declaration) => {
+//   return(
+//     <div>
+//       <form typeof="DeclarationUpdate">
+        
+//       </form>
+//     </div>
+//   )
+// }
+
 // --- App ---
 
 const App = () => {
@@ -646,6 +683,8 @@ const App = () => {
       
       <h2>Lesson 14 — Generic</h2>
       <GenericExample/>
+      
+      <h2>Lesson 15 — Utility</h2>
     </div>
   )
 }
