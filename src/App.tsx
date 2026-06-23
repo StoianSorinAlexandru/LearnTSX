@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from "react"
+import { useState, useEffect, createContext, useContext, useMemo, useCallback } from "react"
 
 // --- Types ---
 
@@ -504,7 +504,7 @@ const ClientDeclarationView = () => {
         <div>
           <h3>{selectedClient.name}</h3>
           <ul>
-            {clientDecs.map((d) => <li key={d.id}>{d.clientName} {d.deadline} {d.type} {d.submitted}</li>)}
+            {clientDecs.map((d) => <li key={d.id}>{d.clientName} {d.deadline} {d.type} {d.submitted ? "Submited" : "Unsubmited"}</li>)}
           </ul>
         </div>
       }
@@ -522,6 +522,76 @@ const ClientPage = () => {
     </ClientProvider>
   )
 }
+
+// --- Lesson 14: Generics ---
+
+type ListProps<T extends {id: string}> = {
+  items: T[],
+  renderItem: (item: T) => React.ReactNode,
+  emptyMessage?: string,
+  onClickFunction?: (item: T) => void
+}
+
+const List = <T extends {id: string},>({items, renderItem, emptyMessage, onClickFunction} : ListProps<T>) => {
+
+  return(
+    <ul>
+      {items.length === 0 && <p>{emptyMessage}</p>}
+      {items.map((i) => (
+        <li key={i.id} onClick={onClickFunction ? () => onClickFunction(i) : undefined}>
+          {renderItem(i)}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+const useFilter = <T,>(items: T[], predicate: (item:T) => boolean)  => {
+  const filtered = useMemo(
+    () => items.filter(predicate),
+    [items, predicate]
+  )
+  return {filtered}
+}
+
+const GenericExample = () => {
+  const [query, setQuery] = useState("")
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const clientName = selectedClient ? selectedClient.name : ""
+  
+  const clientPredictate = useCallback(
+    (client: Client) => client.name.toLowerCase().startsWith(query.toLowerCase()),
+    [query]
+  )
+
+  const declarationPredictate = useCallback(
+    (declaration: Declaration) => declaration.clientName.toLowerCase().startsWith(clientName.toLowerCase()),
+    [clientName]
+  )
+  
+  const myClients = useFilter(mockClients, clientPredictate).filtered
+  const myDecs = useFilter(mockDeclarations, declarationPredictate).filtered
+
+  const handleClearAll = () => {
+    setSelectedClient(null)
+    setQuery("")
+  }
+
+  return (
+    <div>
+      <button type="button" onClick={handleClearAll}>Clear All</button>
+      <h3>Client List</h3>
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <List items={myClients} onClickFunction={setSelectedClient} renderItem={(item) => <p>{item.name}</p> }></List>
+      
+      <h3>Declarations List</h3>
+      <List items={myDecs} renderItem={(item) => <p>{item.clientName}</p>}></List>
+    </div>
+  )
+} 
 
 // --- App ---
 
@@ -573,6 +643,9 @@ const App = () => {
 
       <h2>Lesson 13 — Context</h2>
       <ClientPage/>
+      
+      <h2>Lesson 14 — Generic</h2>
+      <GenericExample/>
     </div>
   )
 }
