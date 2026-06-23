@@ -266,9 +266,7 @@ const AddDeclarationForm = () => {
   )
 }
 
-// --- Lesson 9: DeclarationDashboard (YOUR EXERCISE) ---
-
-// Write your DeclarationDashboard component here 👇
+// --- Lesson 9: DeclarationDashboard ---
 
 
 const DeclarationDashboard = () => {
@@ -306,7 +304,7 @@ const DeclarationDashboard = () => {
   )
 }
 
-// --- Lesson 10: useDeclarations and DeclarationsDashboard
+// --- Lesson 10: useDeclarations and DeclarationsDashboard ---
 const useDeclarations = () => {
   const [declarations, setDeclarations] = useState<Declaration[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -355,7 +353,7 @@ const DeclarationsDashboard = () => {
   return <div>{renderContent()}</div>
 }
 
-// --- Lesson 11: Panel component and Moded App
+// --- Lesson 11: Panel component and Moded App ---
 
 type PanelProps = {
   title: string
@@ -377,6 +375,64 @@ const Panel = ({title, children, collapsible = false} : PanelProps) => {
         )}
       </div>
       {!collapsed && <div>{children}</div>}
+    </div>
+  )
+}
+
+// --- Lesson 12: DeclarationPage ---
+
+type DeclarationType = "all" | "D300" | "D390" | "SAF-T"
+
+const DeclarationPage = () => {
+  const [type, setType] = useState<DeclarationType>("all")
+  const [query, setQuery] = useState("")
+
+
+  return(
+    <div>
+      <input
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      placeholder="Search clients...">
+      
+      </input>
+      <ChildDeclarationFilter type={type} onTypeChange={setType}/>
+      <ChildDeclarationList type={type} query={query}/>
+    </div>
+  )
+}
+
+type ChildDeclarationListProps = {
+  type: DeclarationType,
+  query: string
+}
+
+const ChildDeclarationList = ({type, query} : ChildDeclarationListProps) => {
+  const filtered = mockDeclarations
+  .filter((d) => d.type === type || type === "all")
+  .filter((d) => d.clientName.toLowerCase().startsWith(query.toLowerCase()))
+  return (
+    <ul>
+      {filtered.map((d) => 
+      <li key={d.id}>{d.clientName} {d.type} {d.deadline} {d.submitted}</li>)}
+    </ul>
+  )
+}
+
+type ChildDeclarationFilterProps = {
+  type: DeclarationType,
+  onTypeChange: (type: DeclarationType) => void
+}
+
+const ChildDeclarationFilter = ({type, onTypeChange} : ChildDeclarationFilterProps) => {
+  return (
+    <div>
+      <select value={type} onChange={(e) => onTypeChange(e.target.value as DeclarationType)}>
+        <option value="all">All</option>
+        <option value="SAF-T">SAF-T</option>
+        <option value="D300">D300</option>
+        <option value="D390">D390</option>
+      </select>
     </div>
   )
 }
@@ -425,6 +481,9 @@ const App = () => {
       <Panel title="Add Declaration" collapsible>
         <AddDeclarationForm />
       </Panel>
+
+      <h2>Lesson 12 — DeclarationPage</h2>
+      <DeclarationPage/>
 
     </div>
   )
