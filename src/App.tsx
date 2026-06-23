@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, createContext, useContext } from "react"
 
 // --- Types ---
 
@@ -437,6 +437,92 @@ const ChildDeclarationFilter = ({type, onTypeChange} : ChildDeclarationFilterPro
   )
 }
 
+// --- Lesson 13: Contexts ---
+
+
+type Client = {
+  id: string,
+  name: string
+}
+
+type ClientContextType = {
+  selectedClient: Client | null,
+  selectClient: (client: Client | null) => void
+}
+
+const ClientContext = createContext<ClientContextType | null>(null)
+
+const useClientContext = () => {
+  const ctx = useContext(ClientContext)
+  if(!ctx) throw new Error("useClientContext must be inside ClientContext.Provider")
+  return ctx
+}
+
+const ClientProvider = ({children} : {children : React.ReactNode}) => {
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+
+  return (
+    <ClientContext.Provider value={{
+      selectedClient,
+      selectClient : setSelectedClient
+    }}>
+      {children}
+    </ClientContext.Provider>
+  )
+}
+
+
+const mockClients: Client[] = [
+  { id: "1", name: "Contabilitate SRL" },
+  { id: "2", name: "Audit Expert SRL" },
+  { id: "3", name: "Taxe & Co SRL" },
+]
+
+
+const ClientSelector = () => {
+  const {selectedClient, selectClient} = useClientContext()
+  return (
+    <div>
+      <button onClick={() => selectClient(null)}>Clear</button>
+      {mockClients.map((d) => (
+        <div key={d.id} onClick={() => selectClient(d)}>
+          <p>{selectedClient?.id === d.id && "->"}{d.name}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const ClientDeclarationView = () => {
+  const {selectedClient} = useClientContext()
+  const clientDecs = mockDeclarations.filter((d) => d.clientName.toLowerCase() === selectedClient?.name.toLowerCase())
+  return(
+    <div>
+      {
+        !selectedClient ? 
+        <p>Select a client</p>:
+        <div>
+          <h3>{selectedClient.name}</h3>
+          <ul>
+            {clientDecs.map((d) => <li key={d.id}>{d.clientName} {d.deadline} {d.type} {d.submitted}</li>)}
+          </ul>
+        </div>
+      }
+    </div>
+  )
+}
+
+const ClientPage = () => {
+  return (
+    <ClientProvider>
+      <div style={{ display: "flex", gap: "24px"}}>
+        <ClientSelector />
+        <ClientDeclarationView />
+      </div>
+    </ClientProvider>
+  )
+}
+
 // --- App ---
 
 const App = () => {
@@ -485,6 +571,8 @@ const App = () => {
       <h2>Lesson 12 — DeclarationPage</h2>
       <DeclarationPage/>
 
+      <h2>Lesson 13 — Context</h2>
+      <ClientPage/>
     </div>
   )
 }
