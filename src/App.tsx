@@ -679,6 +679,102 @@ const DeclarationUpdateComponet = () => {
   )
 }
 
+// --- Lesson 16: Discriminated Unions ---
+
+type SubmissionState =
+  | { status: "idle" }
+  | { status: "validating" }
+  | { status: "submitting"; declarationId: string }
+  | { status: "success"; submittedAt: string; declarationId: string }
+  | { status: "error"; message: string; retryable: boolean }
+
+
+const SubmissionFlow = () => {
+  const [state, setState] = useState<SubmissionState>({status: "idle"})
+
+  useEffect(() => {
+    console.log(state.status)
+  }, [state])
+
+  const handleStart = (decId: string) => {
+    setState({status: "validating"})
+
+    setTimeout(() => {
+      setState({status: "submitting", declarationId: decId})
+
+      setTimeout(() => {
+        if(Math.random() > 0.5){
+          setState({
+            status: "success",
+            submittedAt: new Date().toISOString(),
+            declarationId: "DEC-001"
+          })
+        }else{
+          
+          setState({
+            status: "error",
+            message: "Failed to connect to ANAF",
+            retryable: true
+          })
+        }
+      }, 1000) 
+    }, 1000)
+  } 
+
+  const handleReset = () => {
+    setState({status: "idle"})
+  }
+
+
+  switch (state.status) {
+    case "idle":
+      return (
+        <div>
+          <p>Ready to submit</p>
+          <button
+            onClick={() => handleStart("DEC-001")}>
+            Submit
+          </button>
+          
+        </div>
+      )
+    case "validating":
+      return(
+        <p>Validating declaration...</p>
+      )
+    case "submitting":
+      return(
+        <p>Submiting {state.declarationId}</p>
+      )
+      
+      case "success":
+        return (
+          <div>
+          <p>Sucesssfully submited at {state.submittedAt}</p>
+          <button onClick={handleReset}>Reset</button>
+        </div>
+      )
+      case "error":
+        return (
+          <div>
+            <p>Error: {state.message}</p>
+            {state.retryable && <button onClick={() => handleStart("DEC-001")}>Retry</button>}
+            <button onClick={handleReset}>Reset</button>
+          </div>
+        )
+  }
+}
+
+
+const SubmitPage = () => {
+  
+  return(
+    <>
+      <SubmissionFlow />
+    </>
+  )
+}
+
 // --- App ---
 
 const App = () => {
@@ -735,6 +831,10 @@ const App = () => {
       
       <h2>Lesson 15 — Utility</h2>
       <DeclarationUpdateComponet/>
+
+      <h2>Lesson 16 — Discriminated unions</h2>
+      <SubmitPage/>
+
     </div>
   )
 }
